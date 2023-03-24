@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New user</title>
+</head>
+<body>
+
+{% if session.username %}
+
+{% else %}
+<form action="/new_user/submit" method="post">
+    <h2>Login</h2>
+    Username<input type="text" name="username">
+    Password<input type="text" name="password1">
+    Repeat password<input name="password2">
+    <button type="submit" value="Submit">Submit</button>
+</form>
+{% endif %}
+
+</body>
+</html>
