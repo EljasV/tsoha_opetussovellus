@@ -6,3 +6,8 @@ create table users
 );
 
 
+create table course
+(
+    id          SERIAL PRIMARY KEY,
+    course_name TEXT
+);

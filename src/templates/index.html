@@ -8,13 +8,21 @@
 
 {% if session.username %}
 
+<h2>Welcome {{session.username}}!</h2>
+<a href="/logout">Log out</a>
+<a href="/students">Students</a>
+<a href="/teachers">Teachers</a>
+
 {% else %}
-<form>
+<form action="login/submit" method="post">
     <h2>Login</h2>
-    <label for="username">Username</label><input id="username">
-    <label for="password">Password</label><input id="password">
+    <label for="username">Username</label><input id="username" type="text" name="username">
+    <label for="password">Password</label><input id="password" type="text" name="password">
     <button type="submit">Submit</button>
 </form>
+
+<a href="/new_user">Create a new account</a>
+
 {% endif %}
 
 </body>
