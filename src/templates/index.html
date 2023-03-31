@@ -1,29 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Index</title>
-</head>
-<body>
+{% extends "layout.html" %}
 
-{% if session.username %}
+{% block title %}Home{% endblock %}
+
+
+{% block content %}
 
 <h2>Welcome {{session.username}}!</h2>
-<a href="/logout">Log out</a>
-<a href="/students">Students</a>
-<a href="/teachers">Teachers</a>
 
-{% else %}
-<form action="login/submit" method="post">
-    <h2>Login</h2>
-    <label for="username">Username</label><input id="username" type="text" name="username">
-    <label for="password">Password</label><input id="password" type="text" name="password">
-    <button type="submit">Submit</button>
-</form>
 
-<a href="/new_user">Create a new account</a>
 
-{% endif %}
-
-</body>
-</html>
+{% endblock %}

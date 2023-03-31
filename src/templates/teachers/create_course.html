@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}Teachers{% endblock %}
+
+
+{% block content %}
+
+<h2>New course</h2>
+
+<form action="/teachers/create_course/submit" method="post">
+
+    <div>
+        <label for="course_name">Course name</label><input type="text" name="course_name" id="course_name">
+    </div>
+    <div>
+        <label for="description">Course description</label><textarea name="description" id="description"></textarea>
+    </div>
+
+    <button type="submit">Create the course</button>
+</form>
+
+
+{% endblock %}

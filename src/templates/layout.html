@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teaching app {% block title %}{% endblock %}</title>
+</head>
+<body>
+<div>
+    <a href="/">Home</a>
+    <a href="/students">Students</a>
+    <a href="/teachers">Teachers</a>
+    <a href="/logout">Log out</a>
+</div>
+
+
+{% if session.username %}
+
+<div>{% block content %}{% endblock %}</div>
+
+
+{% else %}
+<form action="login/submit" method="post">
+    <h2>Login</h2>
+    <label for="username">Username</label><input id="username" type="text" name="username">
+    <label for="password">Password</label><input id="password" type="text" name="password">
+    <button type="submit">Submit</button>
+</form>
+
+<a href="/new_user">Create a new account</a>
+
+{% endif %}
+
+
+</body>
+</html>

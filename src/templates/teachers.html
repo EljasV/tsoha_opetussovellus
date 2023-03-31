@@ -1,13 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Teachers</title>
-</head>
-<body>
+{% extends "layout.html" %}
+
+{% block title %}Teachers{% endblock %}
+
+
+{% block content %}
+
 <h2>Teachers' page</h2>
 
 <a href="/teachers/create_course">Create a new course</a>
+<a href="/teachers/my_courses">My courses</a>
 
-</body>
-</html>
+{% endblock %}
