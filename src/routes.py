@@ -77,8 +77,20 @@ def teacher_my_courses():
     courses = []
 
     teachers_courses = db.get_teachers_courses(session["username"])
-    print(teachers_courses)
 
     for course in teachers_courses:
-        courses.append({"course_name": course[1], "description": course[2]})
+        courses.append({"course_id": course[0], "course_name": course[1], "description": course[2]})
     return render_template("teachers/my_courses.html", courses=courses)
+
+
+@app.route("/teachers/courses/<int:id>")
+def teacher_courses_id(id: int):
+    course = db.get_course_by_id(id)
+
+    chapters = []
+    fetched_chapters = db.get_courses_chapters(id)
+
+    for chapter in fetched_chapters:
+        chapters.append({"name": chapter[2]})
+
+    return render_template("teachers/courses_id.html", name=course[1], description=course[2], chapters=chapters)

@@ -12,4 +12,14 @@ Siis sovelluksen täytyy...
 * antaa mahdollisuus luoda ja muokata kurssimateriaaleja
 
 ---
+## Nykyinen tilanne
 
+
+Sovellukseen pystyy nyt kirjautumaan sisälle ja opettajat pystyvät luomaan kursseja sekä katsomaan olemassa olevia kursseja.
+
+---
+
+## Sovelluksen kokeileminen
+Sovellusta voidaan testata ajamalla app.py -tiedosto src -kansiossa.
+Sovellus tarvitsee python-paketit, jotka on määritelty requirements.txt-tiedostossa. 
+Ympäristömuuttujien DATABASE_URL ja SECRET_KEY täytyy olla määriteltyjä. Tarvitaan vielä tietokanta, jonka taulut on alustettu schema.sql -tiedoston avulla.

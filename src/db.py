@@ -42,3 +42,15 @@ def get_teachers_courses(username):
         "SELECT C.id, C.course_name, C.description FROM courses C, course_teachers CT, users U WHERE CT.course_id = C.id AND CT.teacher_id = U.id AND U.username = :username")
     r = db.session.execute(sql, {"username": username})
     return r.fetchall()
+
+
+def get_course_by_id(id):
+    sql = text("SELECT * FROM courses WHERE id=:id")
+    r = db.session.execute(sql, {"id": id})
+    return r.fetchone()
+
+
+def get_courses_chapters(id: int):
+    sql = text("SELECT * FROM course_chapters WHERE course_id=:id")
+    r = db.session.execute(sql, {"id": id})
+    return r.fetchall()
