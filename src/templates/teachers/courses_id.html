@@ -5,14 +5,28 @@
 
 {% block content %}
 
-<h2>{{name}}</h2>
+<h2>{{ name }}</h2>
 
-<p>{{description}}</p>
+<p>{{ description }}</p>
 
 <h3>Chapters</h3>
 <ul>
     {% for chapter in chapters %}
-    <li><h3>{{chapter.name}}</h3></li>
+    <li><h3>{{ chapter.name }}</h3></li>
     {% endfor %}
 </ul>
+
+
+<h3>Add a new chapter</h3>
+<form action="/teachers/courses/{{ id }}/submit_chapter" method="post">
+        <div>
+        <label for="chapter_name">Chapter name</label><input type="text" name="chapter_name" id="chapter_name">
+    </div>
+    <div>
+        <label for="chapter_content">Chapter content</label><textarea name="chapter_content" id="chapter_content"></textarea>
+    </div>
+
+    <button type="submit">Create the chapter</button>
+</form>
+
 {% endblock %}

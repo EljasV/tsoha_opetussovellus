@@ -21,9 +21,17 @@ def new_user():
 
 @app.route("/new_user/submit", methods=["POST"])
 def new_user_submit():
-    if (request.form["password1"] != request.form["password2"]):
+    username = request.form["username"]
+    if len(username) < 2:
+        return "Username must be at least 2 characters long"
+    if db.check_if_username_exists(username):
+        return "Username exists already"
+    if len(request.form["password1"]) < 5:
+        return "Password must be at least 7 characters long"
+    if request.form["password1"] != request.form["password2"]:
         return "Passwords must be same"
-    create_new_user(request.form["username"], request.form["password1"])
+
+    create_new_user(username, request.form["password1"])
     return redirect("/")
 
 
@@ -63,7 +71,15 @@ def teachers_create_course():
 
 @app.route("/teachers/create_course/submit", methods=["POST"])
 def teachers_create_course_submit():
-    course = db.add_new_course(request.form["course_name"], request.form["description"])
+    course_name = request.form["course_name"]
+    course_description = request.form["description"]
+
+    if course_name == "":
+        return "Course must have a name"
+    if course_description == "":
+        return "Course must have a description"
+
+    course = db.add_new_course(course_name, course_description)
 
     teacher = db.get_user_by_username(session["username"])[0]
 
@@ -93,4 +109,12 @@ def teacher_courses_id(id: int):
     for chapter in fetched_chapters:
         chapters.append({"name": chapter[2]})
 
-    return render_template("teachers/courses_id.html", name=course[1], description=course[2], chapters=chapters)
+    return render_template("teachers/courses_id.html", name=course[1], description=course[2], chapters=chapters, id=id)
+
+
+@app.route("/teachers/courses/<int:id>/submit_chapter", methods=["POST"])
+def teacher_courses_add_chapter(id: int):
+    chapter_name = request.form["chapter_name"]
+    chapter_content = request.form["chapter_content"]
+    db.add_course_chapter(id, chapter_name, chapter_content)
+    return redirect("/teachers/courses/" + str(id))
