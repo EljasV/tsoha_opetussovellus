@@ -65,5 +65,27 @@ def check_if_username_exists(username: str):
 def add_course_chapter(course_id: int, chapter_name: str, chapter_content: str):
     sql = text(
         "INSERT INTO course_chapters (course_id, chapter_name, chapter_content) VALUES (:course_id, :chapter_name, :chapter_content)")
-    result = db.session.execute(sql, {"course_id": course_id, "chapter_name": chapter_name, "chapter_content": chapter_content})
+    result = db.session.execute(sql, {"course_id": course_id, "chapter_name": chapter_name,
+                                      "chapter_content": chapter_content})
     db.session.commit()
+
+
+def add_course_teacher_by_username(teacher_name: str, course_id: int):
+    sql = text(
+        "INSERT INTO course_teachers (teacher_id, course_id) VALUES ((SELECT id FROM users WHERE username=:teacher_name), :course_id) RETURNING id")
+    r = db.session.execute(sql, {"teacher_name": teacher_name, "course_id": course_id})
+    db.session.commit()
+    return r.fetchone()[0]
+
+
+def get_course_teachers(course_id: int):
+    sql = text(
+        "SELECT U.id, U.username FROM course_teachers CT, users U WHERE CT.course_id = :course_id AND CT.teacher_id = U.id")
+    r = db.session.execute(sql, {"course_id": course_id})
+    return r.fetchall()
+
+
+def get_chapter_by_id(chapter_id: int):
+    sql = text("SELECT * FROM course_chapters WHERE id=:chapter_id")
+    r = db.session.execute(sql, {"chapter_id": chapter_id})
+    return r.fetchone()

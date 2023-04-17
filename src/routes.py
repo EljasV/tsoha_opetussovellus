@@ -107,9 +107,16 @@ def teacher_courses_id(id: int):
     fetched_chapters = db.get_courses_chapters(id)
 
     for chapter in fetched_chapters:
-        chapters.append({"name": chapter[2]})
+        chapters.append({"name": chapter[2], "id": chapter[0]})
 
-    return render_template("teachers/courses_id.html", name=course[1], description=course[2], chapters=chapters, id=id)
+    teachers = []
+    fetcherd_teachers = db.get_course_teachers(id)
+
+    for teacher in fetcherd_teachers:
+        teachers.append({"name": teacher[1]})
+
+    return render_template("teachers/courses_id.html", name=course[1], description=course[2], chapters=chapters, id=id,
+                           teachers=teachers)
 
 
 @app.route("/teachers/courses/<int:id>/submit_chapter", methods=["POST"])
@@ -118,3 +125,19 @@ def teacher_courses_add_chapter(id: int):
     chapter_content = request.form["chapter_content"]
     db.add_course_chapter(id, chapter_name, chapter_content)
     return redirect("/teachers/courses/" + str(id))
+
+
+@app.route("/teachers/courses/<int:id>/add_course_teacher", methods=["POST"])
+def teacher_courses_add_teacher(id: int):
+    teacher_name = request.form["teacher_name"]
+    if not db.check_if_username_exists(teacher_name):
+        return "Teacher must exist"
+    db.add_course_teacher_by_username(teacher_name, id)
+    return redirect("/teachers/courses/" + str(id))
+
+
+@app.route("/teachers/chapters/<int:id>")
+def teacher_chapters_id(id: int):
+    chapter = db.get_chapter_by_id(id)
+
+    return render_template("teachers/chapters_id.html", name=chapter[2], content=chapter[3])
