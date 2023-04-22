@@ -3,7 +3,40 @@
 {% block title %}chapter {{ name }}{% endblock %}
 
 {% block content %}
+<a href="/teachers/courses/{{course.id}}"><-- Course {{course.name}}</a>
 <h2> {{ name }}</h2>
 <p>{{ content }}</p>
+
+
+<h3>Exercises</h3>
+
+{% for exercise in exercises %}
+<div>
+    <p>{{ exercise.question }}</p>
+    <ul>
+        {% for option in exercise.options %}
+        {% if option.correct %}
+        <li><b>{{ option.answer }}</b></li>
+        {% else %}
+        <li>{{ option.answer }}</li>
+        <a href="/teachers/exercises/{{ exercise.id }}/set_correct/{{ option.id }}">Make this the correct answer</a>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    <form action="/teachers/exercises/{{ exercise.id }}/submit_new_option" method="post">
+        <input name="answer"/>
+        <button type="submit">+</button>
+    </form>
+</div>
+{% endfor %}
+
+<h3>Create a new exercise</h3>
+<form action="/teachers/chapters/{{ id }}/submit_new_exercise" method="post">
+    <div>
+        <label for="exercise_question">Question</label><textarea name="exercise_question"
+                                                                 id="exercise_question"></textarea>
+    </div>
+    <button type="submit">Create the exercise</button>
+</form>
 
 {% endblock %}

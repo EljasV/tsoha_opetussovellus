@@ -1,8 +1,7 @@
+from flask import render_template, request, redirect, session, abort
+
 import db
 from app import app
-
-from flask import render_template, request, redirect, session
-
 from db import create_new_user
 
 
@@ -46,12 +45,14 @@ def login_submit():
         return redirect("/")
 
     session["username"] = username
+    session["userid"] = username
     return redirect("/")
 
 
 @app.route("/logout")
 def logout():
     del session["username"]
+    del session["userid"]
     return redirect("/")
 
 
@@ -81,7 +82,7 @@ def teachers_create_course_submit():
 
     course = db.add_new_course(course_name, course_description)
 
-    teacher = db.get_user_by_username(session["username"])[0]
+    teacher = session["userid"]
 
     db.add_course_teacher(teacher, course)
 
@@ -139,5 +140,33 @@ def teacher_courses_add_teacher(id: int):
 @app.route("/teachers/chapters/<int:id>")
 def teacher_chapters_id(id: int):
     chapter = db.get_chapter_by_id(id)
+    if not chapter:
+        return abort(404)
+    fetched_course = db.get_course_by_id(chapter[1])
+    course = {"id": fetched_course[0], "name": fetched_course[1]}
+    exercises = db.get_chapter_exercises_and_answers(id)
 
-    return render_template("teachers/chapters_id.html", name=chapter[2], content=chapter[3])
+    return render_template("teachers/chapters_id.html", id=id, name=chapter[2], content=chapter[3], course=course,
+                           exercises=exercises.values())
+
+
+@app.route("/teachers/chapters/<int:id>/submit_new_exercise", methods=["POST"])
+def teachers_chapters_submit_new_exercise(id: int):
+    exercise_question = request.form["exercise_question"]
+    db.create_new_exercise(id, exercise_question)
+    return redirect("/teachers/chapters/" + str(id))
+
+
+@app.route("/teachers/exercises/<int:id>/submit_new_option", methods=["POST"])
+def teachers_exercises_submit_new_option(id: int):
+    answer = request.form["answer"]
+    db.add_exercise_option(id, answer)
+    chapter_id = db.get_exercise_chapter(id)
+    return redirect("/teachers/chapters/" + str(chapter_id))
+
+
+@app.route("/teachers/exercises/<int:exercise_id>/set_correct/<int:option_id>")
+def teachers_exercises_set_correct(exercise_id: int, option_id: int):
+    db.set_exercise_correct(exercise_id, option_id)
+    chapter_id = db.get_exercise_chapter(exercise_id)
+    return redirect("/teachers/chapters/" + str(chapter_id))

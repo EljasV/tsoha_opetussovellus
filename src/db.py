@@ -89,3 +89,47 @@ def get_chapter_by_id(chapter_id: int):
     sql = text("SELECT * FROM course_chapters WHERE id=:chapter_id")
     r = db.session.execute(sql, {"chapter_id": chapter_id})
     return r.fetchone()
+
+
+def create_new_exercise(chapter_id: int, exercise_question: str):
+    sql = text("INSERT INTO chapter_exercises (chapter_id, question, correct_answer) VALUES (:chapter_id,:question,-1)")
+    r = db.session.execute(sql, {"chapter_id": chapter_id, "question": exercise_question})
+    db.session.commit()
+
+
+def get_chapter_exercises_and_answers(chapter_id: int):
+    sql = text(
+        "SELECT EX.*, OPT.* FROM chapter_exercises EX LEFT JOIN exercise_options OPT ON EX.id = OPT.exercise WHERE EX.chapter_id = :chapter_id")
+
+    r = db.session.execute(sql, {"chapter_id": chapter_id})
+    s = r.fetchall()
+    # En käytyä tässä SQL:ää vaikka tässä voisi käyttää postgresin array_agg- funktiota, mutta se pitäisi muuntaa stringistä johonkin pythonin ymmärtämään muotoon. Yritin aiemmin tehdä tätä edellä mainitulla tavalla, mutta uusi tapa on kaiken kaikkiaan paljon selkeämpi.
+    ret = {}
+    for item in s:
+        exercise_id = item[0]
+        if exercise_id not in ret.keys():
+            ret[exercise_id] = {}
+            ret[exercise_id]["id"] = exercise_id
+            ret[exercise_id]["question"] = item[2]
+            ret[exercise_id]["options"] = []
+        if item[5]:
+            ret[exercise_id]["options"].append({"answer": item[5], "id": item[4], "correct": item[4] == item[3]})
+    return ret
+
+
+def add_exercise_option(exercise_id: int, answer: str):
+    sql = text("INSERT INTO exercise_options (answer, exercise) VALUES (:answer, :exercise_id)")
+    r = db.session.execute(sql, {"answer": answer, "exercise_id": exercise_id})
+    db.session.commit()
+
+
+def get_exercise_chapter(id: int):
+    sql = text("SELECT chapter_id FROM chapter_exercises WHERE id=:id")
+    r = db.session.execute(sql, {"id": id})
+    return r.fetchone()[0]
+
+
+def set_exercise_correct(exercise_id: int, option_id: int):
+    sql = text("UPDATE chapter_exercises SET correct_answer=:option_id WHERE id=:exercise_id")
+    r = db.session.execute(sql, {"exercise_id": exercise_id, "option_id": option_id})
+    db.session.commit()

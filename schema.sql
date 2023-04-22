@@ -41,6 +41,5 @@ create table exercise_options
 (
     id     SERIAL PRIMARY KEY,
     answer TEXT,
-    exercise INTEGER REFERENCES chapter_exercises,
-    index  INTEGER
+    exercise INTEGER REFERENCES chapter_exercises
 );
