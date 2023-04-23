@@ -43,3 +43,11 @@ create table exercise_options
     answer TEXT,
     exercise INTEGER REFERENCES chapter_exercises
 );
+
+
+create table course_students
+(
+    id         SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES users,
+    course_id  INTEGER REFERENCES courses
+);

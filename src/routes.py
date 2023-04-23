@@ -191,3 +191,18 @@ def teachers_exercises_set_correct(exercise_id: int, option_id: int):
 
     db.set_exercise_correct(exercise_id, option_id)
     return redirect("/teachers/chapters/" + str(chapter_id))
+
+
+#
+#   Students
+#
+
+@app.route("/students")
+def students():
+    return render_template("students.html")
+
+
+
+@app.route("/students/my_courses")
+def students_my_courses():
+    return render_template("students/my_courses.html")
