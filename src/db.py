@@ -133,3 +133,9 @@ def set_exercise_correct(exercise_id: int, option_id: int):
     sql = text("UPDATE chapter_exercises SET correct_answer=:option_id WHERE id=:exercise_id")
     r = db.session.execute(sql, {"exercise_id": exercise_id, "option_id": option_id})
     db.session.commit()
+
+
+def does_teacher_teach_course(teacher_id, course_id):
+    sql = text("SELECT 1 FROM course_teachers WHERE teacher_id = :teacher_id AND course_id = :course_id")
+    r = db.session.execute(sql, {"teacher_id": teacher_id, "course_id": course_id})
+    return bool(r.fetchone())

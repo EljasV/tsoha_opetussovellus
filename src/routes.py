@@ -45,7 +45,7 @@ def login_submit():
         return redirect("/")
 
     session["username"] = username
-    session["userid"] = username
+    session["userid"] = user[0]
     return redirect("/")
 
 
@@ -122,6 +122,9 @@ def teacher_courses_id(id: int):
 
 @app.route("/teachers/courses/<int:id>/submit_chapter", methods=["POST"])
 def teacher_courses_add_chapter(id: int):
+    if not session["userid"] or not db.does_teacher_teach_course(session["userid"], id):
+        return "You must be a teacher in the course"
+
     chapter_name = request.form["chapter_name"]
     chapter_content = request.form["chapter_content"]
     db.add_course_chapter(id, chapter_name, chapter_content)
@@ -130,6 +133,9 @@ def teacher_courses_add_chapter(id: int):
 
 @app.route("/teachers/courses/<int:id>/add_course_teacher", methods=["POST"])
 def teacher_courses_add_teacher(id: int):
+    if not session["userid"] or not db.does_teacher_teach_course(session["userid"], id):
+        return "You must be a teacher in the course"
+
     teacher_name = request.form["teacher_name"]
     if not db.check_if_username_exists(teacher_name):
         return "Teacher must exist"
@@ -152,6 +158,11 @@ def teacher_chapters_id(id: int):
 
 @app.route("/teachers/chapters/<int:id>/submit_new_exercise", methods=["POST"])
 def teachers_chapters_submit_new_exercise(id: int):
+    course_id = db.get_chapter_by_id(id)[1]
+
+    if not session["userid"] or not db.does_teacher_teach_course(session["userid"], course_id):
+        return "You must be a teacher in the course"
+
     exercise_question = request.form["exercise_question"]
     db.create_new_exercise(id, exercise_question)
     return redirect("/teachers/chapters/" + str(id))
@@ -159,14 +170,24 @@ def teachers_chapters_submit_new_exercise(id: int):
 
 @app.route("/teachers/exercises/<int:id>/submit_new_option", methods=["POST"])
 def teachers_exercises_submit_new_option(id: int):
+    chapter_id = db.get_exercise_chapter(id)
+    course_id = db.get_chapter_by_id(id)[1]
+
+    if not session["userid"] or not db.does_teacher_teach_course(session["userid"], course_id):
+        return "You must be a teacher in the course"
+
     answer = request.form["answer"]
     db.add_exercise_option(id, answer)
-    chapter_id = db.get_exercise_chapter(id)
     return redirect("/teachers/chapters/" + str(chapter_id))
 
 
 @app.route("/teachers/exercises/<int:exercise_id>/set_correct/<int:option_id>")
 def teachers_exercises_set_correct(exercise_id: int, option_id: int):
-    db.set_exercise_correct(exercise_id, option_id)
     chapter_id = db.get_exercise_chapter(exercise_id)
+    course_id = db.get_chapter_by_id(chapter_id)[1]
+
+    if not session["userid"] or not db.does_teacher_teach_course(session["userid"], course_id):
+        return "You must be a teacher in the course"
+
+    db.set_exercise_correct(exercise_id, option_id)
     return redirect("/teachers/chapters/" + str(chapter_id))
