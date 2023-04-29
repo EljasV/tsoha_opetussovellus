@@ -139,3 +139,28 @@ def does_teacher_teach_course(teacher_id, course_id):
     sql = text("SELECT 1 FROM course_teachers WHERE teacher_id = :teacher_id AND course_id = :course_id")
     r = db.session.execute(sql, {"teacher_id": teacher_id, "course_id": course_id})
     return bool(r.fetchone())
+
+
+def get_all_courses():
+    sql = text("SELECT * FROM courses")
+    r = db.session.execute(sql)
+    return r.fetchall()
+
+
+def add_course_student(student_id, course_id):
+    sql = text("INSERT INTO course_students(student_id, course_id) VALUES (:student_id,:course_id)")
+    r = db.session.execute(sql, {"student_id": student_id, "course_id": course_id})
+    db.session.commit()
+
+
+def is_student_attending_course(student_id, course_id):
+    sql = text("SELECT 1 FROM course_students WHERE course_id=:course_id AND student_id=:student_id")
+    r = db.session.execute(sql, {"course_id": course_id, "student_id": student_id})
+    return bool(r.fetchone())
+
+
+def is_exercise_correct(exercise_id, answer_id):
+    sql = text("SELECT 1 FROM chapter_exercises WHERE id=:exercise_id AND correct_answer=:answer_id")
+    r = db.session.execute(sql, {"exercise_id": exercise_id, "answer_id": answer_id})
+
+    return bool(r.fetchone())

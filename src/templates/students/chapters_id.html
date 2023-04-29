@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}chapter {{ name }}{% endblock %}
+
+{% block content %}
+<a href="/students/courses/{{course.id}}"><-- Course {{course.name}}</a>
+<h2> {{ name }}</h2>
+<p>{{ content }}</p>
+
+
+<h3>Exercises</h3>
+
+{% for exercise in exercises %}
+<div>
+
+    <p>{{ exercise.question }}</p>
+    <form action="/students/exercises/answer" method="post">
+        <input type="hidden" value="{{ exercise.id }}" name="exercise_id">
+        {% for option in exercise.options %}
+        <input type="radio" id="{{ option.id }}" name="answer" value="{{ option.id }}">
+        <label for="{{ option.id }}">
+            {{ option.answer }}
+        </label>
+        <br>
+        {% endfor %}
+        <button type="submit"> Submit</button>
+    </form>
+</div>
+{% endfor %}
+
+
+{% endblock %}

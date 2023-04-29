@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}Course {{name}}{% endblock %}
+
+
+{% block content %}
+
+
+{% if attending %}
+<h2>{{ name }}</h2>
+
+<p>{{ description }}</p>
+
+<h3>Course teachers</h3>
+<ul>
+
+    {% for teacher in teachers %}
+    <li>{{ teacher.name }}</li>
+    {% endfor %}
+</ul>
+
+
+<h3>Chapters</h3>
+<ul>
+    {% for chapter in chapters %}
+    <li><h3><a href="/students/chapters/{{ chapter.id }}">{{ chapter.name }}</a></h3></li>
+    {% endfor %}
+</ul>
+
+
+{% else %}
+<form action="/students/courses/{{ id }}/join" method="post">
+    <button type="submit">Join course</button>
+</form>
+
+{% endif %}
+
+{% endblock %}

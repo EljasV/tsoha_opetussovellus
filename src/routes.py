@@ -2,7 +2,6 @@ from flask import render_template, request, redirect, session, abort
 
 import db
 from app import app
-from db import create_new_user
 
 
 #
@@ -30,7 +29,7 @@ def new_user_submit():
     if request.form["password1"] != request.form["password2"]:
         return "Passwords must be same"
 
-    create_new_user(username, request.form["password1"])
+    db.create_new_user(username, request.form["password1"])
     return redirect("/")
 
 
@@ -202,7 +201,72 @@ def students():
     return render_template("students.html")
 
 
-
 @app.route("/students/my_courses")
 def students_my_courses():
     return render_template("students/my_courses.html")
+
+
+@app.route("/students/all_courses")
+def students_all_courses():
+    fetched_courses = db.get_all_courses()
+    courses = []
+    for course in fetched_courses:
+        courses.append({"course_id": course[0], "course_name": course[1], "description": course[2]})
+
+    return render_template("students/all_courses.html", courses=courses)
+
+
+@app.route("/students/courses/<int:id>")
+def students_courses_id(id: int):
+    student_id = session["userid"]
+    if student_id:
+        attending = db.is_student_attending_course(student_id, id)
+    else:
+        attending = False
+
+    fetched_teachers = db.get_course_teachers(id)
+
+    teachers = []
+    for teacher in fetched_teachers:
+        teachers.append({"name": teacher[1]})
+
+    fetched_chapters = db.get_courses_chapters(id)
+    chapters = []
+
+    for chapter in fetched_chapters:
+        chapters.append({"name": chapter[2], "id": chapter[0]})
+
+    return render_template("students/courses_id.html", attending=attending, id=id, teachers=teachers, chapters=chapters)
+
+
+@app.route("/students/courses/<int:course_id>/join", methods=["POST"])
+def students_courses_join(course_id: int):
+    student_id = session["userid"]
+    if not student_id:
+        return "You must be logged in in order to join the course"
+    db.add_course_student(student_id, course_id)
+    return redirect("/students/courses/" + str(course_id))
+
+
+@app.route("/students/chapters/<int:id>")
+def students_chapters(id: int):
+    chapter = db.get_chapter_by_id(id)
+    if not chapter:
+        return abort(404)
+    fetched_course = db.get_course_by_id(chapter[1])
+    course = {"id": fetched_course[0], "name": fetched_course[1]}
+    exercises = db.get_chapter_exercises_and_answers(id)
+
+    return render_template("students/chapters_id.html", id=id, name=chapter[2], content=chapter[3], course=course,
+                           exercises=exercises.values())
+
+
+@app.route("/students/exercises/answer", methods=["POST"])
+def students_exercises_answer():
+    exercise_id = request.form["exercise_id"]
+    answered_id = request.form["answer"]
+    correct = db.is_exercise_correct(exercise_id, answered_id)
+
+    if correct:
+        return "Right answer!"
+    return "Wrong answer!"
