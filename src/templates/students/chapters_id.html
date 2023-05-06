@@ -12,8 +12,8 @@
 
 {% for exercise in exercises %}
 <div>
-
     <p>{{ exercise.question }}</p>
+    {% if not exercise.answer %}
     <form action="/students/exercises/answer" method="post">
         <input type="hidden" value="{{ exercise.id }}" name="exercise_id">
         {% for option in exercise.options %}
@@ -25,7 +25,24 @@
         {% endfor %}
         <button type="submit"> Submit</button>
     </form>
+    {% else %}
+    <ul>
+        {% for option in exercise.options %}
+        {% if option.id == exercise.correct and exercise.answer.option_id == option.id %}
+        <li><b style="color: #639c08">{{ option.answer }}</b></li>
+        {% elif option.id == exercise.correct %}
+        <li><b>{{ option.answer }}</b></li>
+        {% elif exercise.answer.option_id == option.id %}
+        <li><div style="color: #ff0000">{{ option.answer }}</div></li>
+        {% else %}
+        <li>{{ option.answer }}</li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    {% endif %}
 </div>
+
+
 {% endfor %}
 
 

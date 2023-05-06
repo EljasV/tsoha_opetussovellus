@@ -99,22 +99,16 @@ def create_new_exercise(chapter_id: int, exercise_question: str):
 
 def get_chapter_exercises_and_answers(chapter_id: int):
     sql = text(
-        "SELECT EX.*, OPT.* FROM chapter_exercises EX LEFT JOIN exercise_options OPT ON EX.id = OPT.exercise WHERE EX.chapter_id = :chapter_id")
-
+        "SELECT  EX.*, json_agg( OPT.*) FROM chapter_exercises EX LEFT JOIN exercise_options OPT ON EX.id = OPT.exercise WHERE EX.chapter_id = :chapter_id GROUP BY EX.id")
     r = db.session.execute(sql, {"chapter_id": chapter_id})
-    s = r.fetchall()
-    # En käytyä tässä SQL:ää vaikka tässä voisi käyttää postgresin array_agg- funktiota, mutta se pitäisi muuntaa stringistä johonkin pythonin ymmärtämään muotoon. Yritin aiemmin tehdä tätä edellä mainitulla tavalla, mutta uusi tapa on kaiken kaikkiaan paljon selkeämpi.
-    ret = {}
-    for item in s:
-        exercise_id = item[0]
-        if exercise_id not in ret.keys():
-            ret[exercise_id] = {}
-            ret[exercise_id]["id"] = exercise_id
-            ret[exercise_id]["question"] = item[2]
-            ret[exercise_id]["options"] = []
-        if item[5]:
-            ret[exercise_id]["options"].append({"answer": item[5], "id": item[4], "correct": item[4] == item[3]})
-    return ret
+    return r.fetchall()
+
+
+def get_student_exercises_for_chapter(student_id: int, chapter_id: int):
+    sql = text(
+        "SELECT EX.*, json_agg(DISTINCT OPT.*), json_agg(DISTINCT ES.*) FROM chapter_exercises EX LEFT JOIN exercise_options OPT ON EX.id = OPT.exercise LEFT JOIN exercise_submissions ES ON ES.exercise_id=EX.id WHERE EX.chapter_id=:chapter_id AND (ES.student_id=:student_id OR ES.student_id IS NULL) GROUP BY EX.id")
+    r = db.session.execute(sql, {"student_id": student_id, "chapter_id": chapter_id})
+    return r.fetchall()
 
 
 def add_exercise_option(exercise_id: int, answer: str):
@@ -135,7 +129,7 @@ def set_exercise_correct(exercise_id: int, option_id: int):
     db.session.commit()
 
 
-def does_teacher_teach_course(teacher_id, course_id):
+def does_teacher_teach_course(teacher_id: int, course_id: int):
     sql = text("SELECT 1 FROM course_teachers WHERE teacher_id = :teacher_id AND course_id = :course_id")
     r = db.session.execute(sql, {"teacher_id": teacher_id, "course_id": course_id})
     return bool(r.fetchone())
@@ -147,20 +141,34 @@ def get_all_courses():
     return r.fetchall()
 
 
-def add_course_student(student_id, course_id):
+def add_course_student(student_id: int, course_id: int):
     sql = text("INSERT INTO course_students(student_id, course_id) VALUES (:student_id,:course_id)")
     r = db.session.execute(sql, {"student_id": student_id, "course_id": course_id})
     db.session.commit()
 
 
-def is_student_attending_course(student_id, course_id):
+def is_student_attending_course(student_id: int, course_id: int):
     sql = text("SELECT 1 FROM course_students WHERE course_id=:course_id AND student_id=:student_id")
     r = db.session.execute(sql, {"course_id": course_id, "student_id": student_id})
     return bool(r.fetchone())
 
 
-def is_exercise_correct(exercise_id, answer_id):
+def is_exercise_correct(exercise_id: int, answer_id: int):
     sql = text("SELECT 1 FROM chapter_exercises WHERE id=:exercise_id AND correct_answer=:answer_id")
     r = db.session.execute(sql, {"exercise_id": exercise_id, "answer_id": answer_id})
 
     return bool(r.fetchone())
+
+
+def get_students_courses(student_id: int):
+    sql = text("SELECT CO.* FROM courses CO, course_students CS WHERE CO.id=CS.course_id AND CS.student_id=:student_id")
+    r = db.session.execute(sql, {"student_id": student_id})
+    return r.fetchall()
+
+
+def submit_exercise(student_id: int, exercise_id: int, answered_id: int):
+    sql = text(
+        "INSERT INTO exercise_submissions (student_id, exercise_id, option_id) VALUES (:student_id, :exercise_id, :option_id)")
+    r = db.session.execute(sql, {"student_id": student_id, "exercise_id": exercise_id, "option_id": answered_id})
+    db.session.commit()
+    return None

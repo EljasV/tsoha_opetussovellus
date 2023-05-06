@@ -149,10 +149,18 @@ def teacher_chapters_id(id: int):
         return abort(404)
     fetched_course = db.get_course_by_id(chapter[1])
     course = {"id": fetched_course[0], "name": fetched_course[1]}
-    exercises = db.get_chapter_exercises_and_answers(id)
+
+    fetched_exercises = db.get_chapter_exercises_and_answers(id)
+
+    exercises = []
+    for exercise in fetched_exercises:
+        options = exercise[4]
+        if options == [None]:
+            options = []
+        exercises.append({"id": exercise[0], "question": exercise[2], "options": options, "correct": exercise[3]})
 
     return render_template("teachers/chapters_id.html", id=id, name=chapter[2], content=chapter[3], course=course,
-                           exercises=exercises.values())
+                           exercises=exercises)
 
 
 @app.route("/teachers/chapters/<int:id>/submit_new_exercise", methods=["POST"])
@@ -170,7 +178,7 @@ def teachers_chapters_submit_new_exercise(id: int):
 @app.route("/teachers/exercises/<int:id>/submit_new_option", methods=["POST"])
 def teachers_exercises_submit_new_option(id: int):
     chapter_id = db.get_exercise_chapter(id)
-    course_id = db.get_chapter_by_id(id)[1]
+    course_id = db.get_chapter_by_id(chapter_id)[1]
 
     if not session["userid"] or not db.does_teacher_teach_course(session["userid"], course_id):
         return "You must be a teacher in the course"
@@ -203,7 +211,11 @@ def students():
 
 @app.route("/students/my_courses")
 def students_my_courses():
-    return render_template("students/my_courses.html")
+    fetched_courses = db.get_students_courses(session["userid"])
+    courses = []
+    for course in fetched_courses:
+        courses.append({"course_id": course[0], "course_name": course[1], "description": course[2]})
+    return render_template("students/my_courses.html", courses=courses)
 
 
 @app.route("/students/all_courses")
@@ -255,16 +267,32 @@ def students_chapters(id: int):
         return abort(404)
     fetched_course = db.get_course_by_id(chapter[1])
     course = {"id": fetched_course[0], "name": fetched_course[1]}
-    exercises = db.get_chapter_exercises_and_answers(id)
+
+    fetched_exercises = db.get_student_exercises_for_chapter(session["userid"], id)
+
+    exercises = []
+    for exercise in fetched_exercises:
+        answer = exercise[5][0]
+        if answer is not None:
+            correct = exercise[3]
+        else:
+            correct = -1
+
+        exercises.append({"id": exercise.id, "question": exercise.question, "options": exercise[4], "answer": answer,
+                          "correct": correct})
 
     return render_template("students/chapters_id.html", id=id, name=chapter[2], content=chapter[3], course=course,
-                           exercises=exercises.values())
+                           exercises=exercises)
 
 
 @app.route("/students/exercises/answer", methods=["POST"])
 def students_exercises_answer():
+    student_id = session["userid"]
     exercise_id = request.form["exercise_id"]
     answered_id = request.form["answer"]
+
+    db.submit_exercise(student_id, exercise_id, answered_id)
+
     correct = db.is_exercise_correct(exercise_id, answered_id)
 
     if correct:

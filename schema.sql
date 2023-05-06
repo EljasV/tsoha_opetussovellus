@@ -39,8 +39,8 @@ create table chapter_exercises
 
 create table exercise_options
 (
-    id     SERIAL PRIMARY KEY,
-    answer TEXT,
+    id       SERIAL PRIMARY KEY,
+    answer   TEXT,
     exercise INTEGER REFERENCES chapter_exercises
 );
 
@@ -50,4 +50,13 @@ create table course_students
     id         SERIAL PRIMARY KEY,
     student_id INTEGER REFERENCES users,
     course_id  INTEGER REFERENCES courses
+);
+
+
+create table exercise_submissions
+(
+    id          SERIAL PRIMARY KEY,
+    student_id  INTEGER REFERENCES users,
+    exercise_id INTEGER REFERENCES chapter_exercises,
+    option_id   INTEGER REFERENCES exercise_options
 );

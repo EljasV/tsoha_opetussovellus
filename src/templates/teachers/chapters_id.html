@@ -15,7 +15,7 @@
     <p>{{ exercise.question }}</p>
     <ul>
         {% for option in exercise.options %}
-        {% if option.correct %}
+        {% if exercise.correct==option.id %}
         <li><b>{{ option.answer }}</b></li>
         {% else %}
         <li>{{ option.answer }}</li>
