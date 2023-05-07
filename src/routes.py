@@ -1,4 +1,5 @@
 from flask import render_template, request, redirect, session, abort
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import db
 from app import app
@@ -29,7 +30,7 @@ def new_user_submit():
     if request.form["password1"] != request.form["password2"]:
         return "Passwords must be same"
 
-    db.create_new_user(username, request.form["password1"])
+    db.create_new_user(username, generate_password_hash(request.form["password1"]))
     return redirect("/")
 
 
@@ -40,7 +41,7 @@ def login_submit():
 
     user = db.get_user_by_username(username)
 
-    if user is None or user[2] != password:
+    if user is None or not check_password_hash(user[2], password):
         return redirect("/")
 
     session["username"] = username

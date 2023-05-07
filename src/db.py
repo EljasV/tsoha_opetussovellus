@@ -10,9 +10,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
 db = SQLAlchemy(app)
 
 
-def create_new_user(username: str, password: str):
-    sql = text("INSERT INTO users (username, password) VALUES (:username, :password) RETURNING id")
-    r = db.session.execute(sql, {"username": username, "password": password})
+def create_new_user(username: str, password_hash: str):
+    sql = text("INSERT INTO users (username, password_hash) VALUES (:username, :password_hash) RETURNING id")
+    r = db.session.execute(sql, {"username": username, "password_hash": password_hash})
     db.session.commit()
     return r.fetchone()[0]
 
