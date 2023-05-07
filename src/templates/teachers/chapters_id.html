@@ -45,4 +45,18 @@
     <button type="submit">Create the exercise</button>
 </form>
 
+<h3>Edit chapter content</h3>
+<form action="/teachers/chapters/edit" method="post">
+    <input type="hidden" name="chapter_id" value="{{ id }}">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    <div>
+        <label for="chapter_name">Chapter name: </label><input type="text" name="chapter_name" id="chapter_name"
+                                                              value="{{ name }}">
+    </div>
+    <div>
+        <label for="chapter_content">Chapter content: </label><textarea name="chapter_content" id="chapter_content">{{ content }}</textarea>
+    </div>
+    <button type="submit">Submit changes</button>
+</form>
+
 {% endblock %}

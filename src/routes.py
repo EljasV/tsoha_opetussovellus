@@ -225,6 +225,22 @@ def teachers_exercises_set_correct(exercise_id: int):
     return redirect("/teachers/chapters/" + str(chapter_id))
 
 
+@app.route("/teachers/chapters/edit", methods=["POST"])
+def teacher_chapters_edit():
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
+    id = request.form["chapter_id"]
+    if not db.does_teacher_teach_course(session["userid"], int(id)):
+        return "You must be tacher to edit chapter content!"
+
+    name = request.form["chapter_name"]
+    content = request.form["chapter_content"]
+    db.update_chapter_content(id, name, content)
+
+    return redirect("/teachers/chapters/" + id)
+
+
 #
 #   Students
 #

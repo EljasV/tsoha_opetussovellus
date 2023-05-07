@@ -179,3 +179,11 @@ def get_students_course_statistics(student_id: int, course_id: int):
         "SELECT count(EX), count(ES), count((SELECT ES WHERE ES.option_id=EX.correct_answer)) FROM course_chapters CC, chapter_exercises EX LEFT JOIN exercise_submissions ES ON ES.exercise_id=EX.id WHERE EX.chapter_id=CC.id AND CC.course_id=:course_id AND (ES.student_id=:student_id OR ES.id IS NULL)")
     r = db.session.execute(sql, {"student_id": student_id, "course_id": course_id})
     return r.fetchone()
+
+
+def update_chapter_content(id: int, chapter_name: str, chapter_content: str):
+    sql = text(
+        "UPDATE course_chapters SET chapter_name = :chapter_name, chapter_content = :chapter_content WHERE id = :id")
+    r = db.session.execute(sql, {"chapter_name": chapter_name, "chapter_content": chapter_content, "id": id})
+    db.session.commit()
+    return None
