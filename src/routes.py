@@ -1,3 +1,5 @@
+import secrets
+
 from flask import render_template, request, redirect, session, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -46,6 +48,8 @@ def login_submit():
 
     session["username"] = username
     session["userid"] = user[0]
+    session["csrf_token"] = secrets.token_hex(16)
+
     return redirect("/")
 
 
@@ -53,6 +57,7 @@ def login_submit():
 def logout():
     del session["username"]
     del session["userid"]
+    del session["csrf_token"]
     return redirect("/")
 
 
@@ -72,8 +77,13 @@ def teachers_create_course():
 
 @app.route("/teachers/create_course/submit", methods=["POST"])
 def teachers_create_course_submit():
+    teacher = session["userid"]
+
     course_name = request.form["course_name"]
     course_description = request.form["description"]
+
+    if session["csrf_token"] != request.form["csrf_token"] or teacher is None:
+        abort(403)
 
     if course_name == "":
         return "Course must have a name"
@@ -81,8 +91,6 @@ def teachers_create_course_submit():
         return "Course must have a description"
 
     course = db.add_new_course(course_name, course_description)
-
-    teacher = session["userid"]
 
     db.add_course_teacher(teacher, course)
 
@@ -97,7 +105,7 @@ def teacher_my_courses():
 
     for course in teachers_courses:
         courses.append({"course_id": course[0], "course_name": course[1], "description": course[2]})
-    return render_template("teachers/my_courses.html", courses=courses)
+    return render_template("teachers/my_courses.html", courses=courses, session=session)
 
 
 @app.route("/teachers/courses/<int:id>")
@@ -117,11 +125,14 @@ def teacher_courses_id(id: int):
         teachers.append({"name": teacher[1]})
 
     return render_template("teachers/courses_id.html", name=course[1], description=course[2], chapters=chapters, id=id,
-                           teachers=teachers)
+                           teachers=teachers, session=session)
 
 
 @app.route("/teachers/courses/<int:id>/submit_chapter", methods=["POST"])
 def teacher_courses_add_chapter(id: int):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        return abort(403)
+
     if not session["userid"] or not db.does_teacher_teach_course(session["userid"], id):
         return "You must be a teacher in the course"
 
@@ -133,6 +144,9 @@ def teacher_courses_add_chapter(id: int):
 
 @app.route("/teachers/courses/<int:id>/add_course_teacher", methods=["POST"])
 def teacher_courses_add_teacher(id: int):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
     if not session["userid"] or not db.does_teacher_teach_course(session["userid"], id):
         return "You must be a teacher in the course"
 
@@ -161,11 +175,14 @@ def teacher_chapters_id(id: int):
         exercises.append({"id": exercise[0], "question": exercise[2], "options": options, "correct": exercise[3]})
 
     return render_template("teachers/chapters_id.html", id=id, name=chapter[2], content=chapter[3], course=course,
-                           exercises=exercises)
+                           exercises=exercises, session=session)
 
 
 @app.route("/teachers/chapters/<int:id>/submit_new_exercise", methods=["POST"])
 def teachers_chapters_submit_new_exercise(id: int):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
     course_id = db.get_chapter_by_id(id)[1]
 
     if not session["userid"] or not db.does_teacher_teach_course(session["userid"], course_id):
@@ -178,6 +195,9 @@ def teachers_chapters_submit_new_exercise(id: int):
 
 @app.route("/teachers/exercises/<int:id>/submit_new_option", methods=["POST"])
 def teachers_exercises_submit_new_option(id: int):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
     chapter_id = db.get_exercise_chapter(id)
     course_id = db.get_chapter_by_id(chapter_id)[1]
 
@@ -189,10 +209,14 @@ def teachers_exercises_submit_new_option(id: int):
     return redirect("/teachers/chapters/" + str(chapter_id))
 
 
-@app.route("/teachers/exercises/<int:exercise_id>/set_correct/<int:option_id>")
-def teachers_exercises_set_correct(exercise_id: int, option_id: int):
+@app.route("/teachers/exercises/<int:exercise_id>/set_correct", methods=["POST"])
+def teachers_exercises_set_correct(exercise_id: int):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
     chapter_id = db.get_exercise_chapter(exercise_id)
     course_id = db.get_chapter_by_id(chapter_id)[1]
+    option_id = request.form["option_id"]
 
     if not session["userid"] or not db.does_teacher_teach_course(session["userid"], course_id):
         return "You must be a teacher in the course"
@@ -254,11 +278,14 @@ def students_courses_id(id: int):
                   "incorrect": fetched_statistics[1] - fetched_statistics[2]}
 
     return render_template("students/courses_id.html", attending=attending, id=id, teachers=teachers, chapters=chapters,
-                           statistics=statistics)
+                           statistics=statistics, session=session)
 
 
 @app.route("/students/courses/<int:course_id>/join", methods=["POST"])
 def students_courses_join(course_id: int):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
     student_id = session["userid"]
     if not student_id:
         return "You must be logged in in order to join the course"
@@ -288,11 +315,14 @@ def students_chapters(id: int):
                           "correct": correct})
 
     return render_template("students/chapters_id.html", id=id, name=chapter[2], content=chapter[3], course=course,
-                           exercises=exercises)
+                           exercises=exercises, session=session)
 
 
 @app.route("/students/exercises/answer", methods=["POST"])
 def students_exercises_answer():
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
     student_id = session["userid"]
     exercise_id = request.form["exercise_id"]
     answered_id = request.form["answer"]

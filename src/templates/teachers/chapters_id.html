@@ -19,11 +19,16 @@
         <li><b>{{ option.answer }}</b></li>
         {% else %}
         <li>{{ option.answer }}</li>
-        <a href="/teachers/exercises/{{ exercise.id }}/set_correct/{{ option.id }}">Make this the correct answer</a>
+        <form action="/teachers/exercises/{{ exercise.id }}/set_correct" method="post">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+            <input type="hidden" name="option_id" value="{{ option.id }}">
+            <button type="submit">Make this the correct answer</button>
+        </form>
         {% endif %}
         {% endfor %}
     </ul>
     <form action="/teachers/exercises/{{ exercise.id }}/submit_new_option" method="post">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
         <input name="answer"/>
         <button type="submit">+</button>
     </form>
@@ -32,6 +37,7 @@
 
 <h3>Create a new exercise</h3>
 <form action="/teachers/chapters/{{ id }}/submit_new_exercise" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
     <div>
         <label for="exercise_question">Question</label><textarea name="exercise_question"
                                                                  id="exercise_question"></textarea>

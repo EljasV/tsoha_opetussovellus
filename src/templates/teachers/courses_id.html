@@ -28,6 +28,7 @@
 
 <h3>Add a new chapter</h3>
 <form action="/teachers/courses/{{ id }}/submit_chapter" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
     <div>
         <label for="chapter_name">Chapter name</label><input type="text" name="chapter_name" id="chapter_name">
     </div>
@@ -40,6 +41,7 @@
 </form>
 
 <form action="/teachers/courses/{{ id }}/add_course_teacher" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
     <label for="teacher_name"></label> <input type="text" name="teacher_name" id="teacher_name">
     <button type="submit">Add teacher to the course</button>
 </form>

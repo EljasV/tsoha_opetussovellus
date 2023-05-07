@@ -36,6 +36,7 @@
 
 {% else %}
 <form action="/students/courses/{{ id }}/join" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
     <button type="submit">Join course</button>
 </form>
 

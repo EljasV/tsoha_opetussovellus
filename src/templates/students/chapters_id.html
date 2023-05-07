@@ -15,6 +15,7 @@
     <p>{{ exercise.question }}</p>
     {% if not exercise.answer %}
     <form action="/students/exercises/answer" method="post">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
         <input type="hidden" value="{{ exercise.id }}" name="exercise_id">
         {% for option in exercise.options %}
         <input type="radio" id="{{ option.id }}" name="answer" value="{{ option.id }}">
