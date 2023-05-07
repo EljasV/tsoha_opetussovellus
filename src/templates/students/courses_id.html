@@ -28,6 +28,12 @@
 </ul>
 
 
+<h3>Exercise statistics</h3>
+<p>In total {{ statistics.total }}</p>
+<p>Done {{ statistics.done }}</p>
+<p>Correct {{ statistics.correct }}</p>
+<p>Incorrect {{ statistics.incorrect }}</p>
+
 {% else %}
 <form action="/students/courses/{{ id }}/join" method="post">
     <button type="submit">Join course</button>

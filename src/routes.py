@@ -248,7 +248,12 @@ def students_courses_id(id: int):
     for chapter in fetched_chapters:
         chapters.append({"name": chapter[2], "id": chapter[0]})
 
-    return render_template("students/courses_id.html", attending=attending, id=id, teachers=teachers, chapters=chapters)
+    fetched_statistics = db.get_students_course_statistics(student_id, id)
+    statistics = {"total": fetched_statistics[0], "done": fetched_statistics[1], "correct": fetched_statistics[2],
+                  "incorrect": fetched_statistics[1] - fetched_statistics[2]}
+
+    return render_template("students/courses_id.html", attending=attending, id=id, teachers=teachers, chapters=chapters,
+                           statistics=statistics)
 
 
 @app.route("/students/courses/<int:course_id>/join", methods=["POST"])
@@ -293,8 +298,6 @@ def students_exercises_answer():
 
     db.submit_exercise(student_id, exercise_id, answered_id)
 
-    correct = db.is_exercise_correct(exercise_id, answered_id)
+    chapter_id = db.get_exercise_chapter(exercise_id)
 
-    if correct:
-        return "Right answer!"
-    return "Wrong answer!"
+    return redirect("/students/chapters/" + str(chapter_id))
