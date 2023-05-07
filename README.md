@@ -16,7 +16,8 @@ Siis sovelluksen täytyy...
 
 
 Sovellukseen pystyy nyt kirjautumaan sisälle ja opettajat pystyvät luomaan kursseja sekä katsomaan olemassa olevia kursseja.
-Kursseille voi luoda lukuja ja luvuille voi luoda tehtäviä.
+Kursseille voi luoda lukuja ja luvuille voi luoda tehtäviä. Oppilaat voivat tehdä tehtäviä ja ne tarkistetaan automaattisesti. Kurrssilla tehtävistä tehtävistä muodostetaan yhteenveto käyttäjälle.
+Opettajat voivat nyt muokata kurssimateriaaleja.
 
 ---
 
