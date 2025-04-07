@@ -1,4 +1,9 @@
 # Tsoha opetussovellus
+
+## Dockerized for devops with docker
+Changes:
+- Added Dockerfile
+
 ## Aihe
 Tarkoituksena on tehdä esimerkkiaiheen mukainen opetussovellus.
 
